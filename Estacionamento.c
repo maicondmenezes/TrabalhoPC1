@@ -7,7 +7,7 @@
 struct estacionamento {
 unsigned int id;
 int status;
-unsigned long int carro;
+unsigned int carro;
 float pesoMaximo;
 float alturaMaxima;
 float comprimentoMaximo;
@@ -21,36 +21,39 @@ float altura;
 float comprimento;
 float largura;
 int estacionado;
-unsigned long int chassi;
+unsigned int chassi;
 } carros[MAX];
 
-//declaraÃ§Ã£o de protÃ³tipos de funÃ§Ãµes
-int PosicaoCarroLivre(void); 
-int PosicaoVagaLivre(void); 
-int BuscarPorChassi (int chassi);
-int BuscarPorId (int id);
-void EstacionarCarro(void);
-void InserirVaga(char *NomeArquivoVagas);
-void InserirCarro(char *NomeArquivoCarros);
-void ApagarVagaPorId(void);
-void ListarCarros(void);
-int ListarCarroPorChassi(void);
-int ListarVagas(void);
-int ListarVagaPorId(void);
-int Menu(void);
-int Livre(void);
-void Cria_lista(void);
-void CriarPainel(void);
-void LerString(char *destino, int tamanho, char *arquivo);
-void ApagarPorNome (void);
+//declaração de protótipos de funções
+
+//funções de manipulação dos véiculos
+int PosicaoCarroLivre(void);					//procura no vetor 'carros' pelo primeiro indice livre (carro.chassi=0), caso não encontre retorna -1
+int BuscarCarroPorChassi (int chassi);		    //Retorna o indice 'i' do chassi inserido como parametro, caso não encontre retorna -1
+void EstacionarCarro(void);						//Procura no vetor 'vagas' a primeira vaga livre e disponivel para estacionar o carro
+void InserirCarro(char *NomeArquivoCarros);		//Alimenta o  vetor 'carros' com dados de um arquivo externo passado como parametro
+void ListarCarroPorChassi(unsigned int chassi); //
 void ApagarCarroPorChassi(void);
+void ImprimirFilaDeCarros(void); 
+void SalvarCarros(char *NomeArquivoCarros);
+void ListarCarros(void);
+
+//funções de manipulação das vagas 
+int PosicaoVagaLivre(void);	
+int BuscarVagaPorId (int id);
+int ListarVagas(void);
+int ListarVagaPorId(unsigned int id);
 void ImprimirVagasOcupadas(void);
 void ImprimirVagasLivres(void);
-void ImprimirFilaDeCarros(void);
 void SalvarVagas(char *NomeArquivoVagas);
-void SalvarCarros(char *NomeArquivoCarros);
+void InserirVaga(char *NomeArquivoVagas);
+void ApagarVagaPorId(void);
 
-//funÃ§Ã£o principal
+//funções gerais do sistema
+int Menu(void);
+void Cria_lista(void);
+void CriarPainel(void);
+
+//função principal
 int main(void) {
 	int escolha;
 	
@@ -90,7 +93,7 @@ void Cria_lista(void) {
 /*cria a lista de carros e vagas, assumindo
  valor 0 para o status e o id das vagas, indicando
  uma vaga livre, o chassi dos carros recebe o valor zero 
- indicando uma posição livre*/
+ indicando uma posi褯 livre*/
 	int i;
 	
 	for( i=0; i<MAX; i++){
@@ -110,9 +113,9 @@ int Menu(void) {
 	
 	do {
 		printf("-- MENU:\n");
-		printf("\t 1. Inserir um veículo\n");
+		printf("\t 1. Inserir um velo\n");
 		printf("\t 2. Inserir uma vaga\n");
-		printf("\t 3. Apagar um veículo\n");
+		printf("\t 3. Apagar um velo\n");
 		printf("\t 4. Apagar uma vaga\n");
         printf("\t 5. Listar vagas ocupadas\n");
 		printf("\t 6. Listar vagas livres\n");
@@ -153,13 +156,13 @@ int PosicaoCarroLivre(void) {
 
 void EstacionarCarro(void) {
 	int i, indiceCarro=0;
-	unsigned long int chassi;
+	unsigned int chassi;
 	
 	printf("Digite o numero do chassi do carro a ser estacionado:");
-	scanf("%lu", &chassi);
+	scanf("%u", &chassi);
 
-	indiceCarro=BuscarPorChassi(chassi);
-	printf("O indice do carro %lu é %d\n", chassi, indiceCarro);
+	indiceCarro=BuscarCarroPorChassi(chassi);
+	
 	if (indiceCarro!=-1){
 				
 		for( i=0;i<MAX || vagas[i].status==0 ;i++){
@@ -177,9 +180,9 @@ void EstacionarCarro(void) {
 	
 		
 	}if( i != MAX )
-		printf("O carro chassi %lu foi estacionado na vaga %d\n", chassi, i);
+		printf("O carro chassi %u foi estacionado na vaga %d\n", chassi, i+1);
 	else
-		printf("Não existe vaga disponivel no estacionamento para este véiculo\n");
+		printf("N䯠existe vaga disponivel no estacionamento para este vꪣulo\n");
 }
 
 void ApagarVagaPorId(void) {
@@ -187,24 +190,27 @@ void ApagarVagaPorId(void) {
 	int posicao;
 	char opcao;
 	
-	printf("Digite o ID da vaga a ser excluÃ­da:");
+	printf("Digite o ID da vaga a ser excluída:");
 	scanf("%d", &id);
-	posicao = BuscarPorId(id);
+	posicao = BuscarVagaPorId(id);
 	
 	if (posicao < 0)
-		printf("A vaga de ID '%d' nÃ£o exite no cadastro! \n", id);
+		printf("A vaga de ID '%d' não exite no cadastro! \n", id);
 	else{
-		do{
-			printf("VocÃª realmente deseja excluir a vaga ID '%d' do cadastro? (s/n) \n", id);
+		while(opcao != 's' && opcao != 'n'){
+			printf("Você realmente deseja excluir a vaga ID '%d' do cadastro? (s/n) \n", id);
 			opcao = tolower(getchar());
-		}while (opcao != 's' && opcao != 'n');
+		}
 		
-		if (opcao == 's')
+		if (opcao == 's'){
 			vagas[posicao].id=0;
+			printf("A vaga id:%u foi excluído do sistema\n", id);			
+		}
+			
 	}
 }
 
-int BuscarPorId(int id){
+int BuscarVagaPorId(int id){
 	int i=0;
 	
 	while (i<MAX && vagas[i].id != id){
@@ -216,7 +222,7 @@ int BuscarPorId(int id){
 	return i;
 }
 
-int BuscarPorChassi (int chassi){
+int BuscarCarroPorChassi (int chassi){
 	int i;
 	
 	for (i=0;i<MAX && carros[i].chassi != chassi;i++);	
@@ -228,24 +234,27 @@ int BuscarPorChassi (int chassi){
 }
 
 void ApagarCarroPorChassi(void){
-	unsigned long int chassi;
+	unsigned int chassi;
 	int posicao;
 	char opcao;
 	
-	printf("Digite o chassi do carro a ser excluÃ­do:");
-	scanf("%lu", &chassi);
-	posicao = BuscarPorChassi(chassi);
+	printf("Digite o chassi do carro a ser excluído:");
+	scanf("%u", &chassi);
+	posicao = BuscarCarroPorChassi(chassi);
 	
 	if (posicao < 0)
-		printf("O carro de chassi '%lu' nÃ£o exite no cadastro! \n", chassi);
+		printf("O carro de chassi '%u' não exite no cadastro! \n", chassi);
 	else{
-		do{
-			printf("VocÃª realmente deseja excluir o carro chassi NÂº %lu do cadastro? (s/n) \n", chassi);
-			opcao = tolower(getchar());
-		}while (opcao != 's' && opcao != 'n');
 		
-		if (opcao == 's')
+		while (opcao != 's' && opcao != 'n'){
+			printf("Você realmente deseja excluir o carro chassi Nº %u do cadastro? (s/n)\n", chassi);
+			opcao = tolower(getchar());
+		}
+		
+		if (opcao == 's'){
 			carros[posicao].chassi=0;
+			printf("O carro chassi Nº%u foi excluído do sistema\n", chassi);
+		}			
 	}
 }
 
@@ -253,24 +262,24 @@ void InserirCarro(char *NomeArquivoCarros){
 	int i=0;
 	FILE *ArquivoCarros;
 	/* Esta condicional verifica se o arquivo existe 
-	 * e se foi possível abrir, caso negativo encerra a função  */
+	 * e se foi possl abrir, caso negativo encerra a fun褯  */
 	if((ArquivoCarros = fopen(NomeArquivoCarros,"r"))==NULL){
-		printf("Não foi possível abrir o arquivo '%s'. \n", NomeArquivoCarros);
+		printf("N䯠foi possl abrir o arquivo '%s'. \n", NomeArquivoCarros);
 		return; //
 	}
 	
-	/*Laço de repetição para alimentar o vetor de veículos
-	 * enquanto o arquivo não termina
-	 * as interações são controladas pelo incremento da variavel i*/
+	/*La诠de repeti褯 para alimentar o vetor de velos
+	 * enquanto o arquivo n䯠termina
+	 * as intera趥s s䯠controladas pelo incremento da variavel i*/
 	while(!feof(ArquivoCarros)){
 		
-		/*Função que alimenta a string de modelo do carro
-		 * a condicional limpa os espaços em branco após a leitura*/
+		/*Fun褯 que alimenta a string de modelo do carro
+		 * a condicional limpa os espa谳 em branco ap󳠡 leitura*/
 		/*fgets(carros[i].modelo, 30, ArquivoCarros);
 		if(carros[i].modelo[strlen(carros[i].modelo)-1]=='\n')
 			carros[i].modelo[strlen(carros[i].modelo)-1]='\0';*/
 		
-		fscanf(ArquivoCarros, " %s %lu %f %f %f %f", 
+		fscanf(ArquivoCarros, " %s %u %f %f %f %f", 
 		&(carros[i].modelo),
 		&(carros[i].chassi),
 		&(carros[i].peso), 
@@ -288,7 +297,7 @@ void ImprimirFilaDeCarros(void){
 	printf(" | chassi | modelo | peso | altura | largura | comprimento |");
 	for( i=0; i< MAX; i++){
 		if(carros[i].estacionado)
-		printf("|%lu | %s | %f | %f | %f | %f | ", 
+		printf("|%u | %s | %f | %f | %f | %f | ", 
 		carros[i].chassi, 
 		carros[i].modelo, 
 		carros[i].peso, 
@@ -300,11 +309,11 @@ void ImprimirFilaDeCarros(void){
 
 void ImprimirVagasOcupadas(void){
 	int i;
-	printf(" | ID | PesoMax | AlturaMax | LarguraMax | ComprimentoMax | Carro Estacionado |\n");
 	
-	for( i=0; i< MAX; i++){
-		if(vagas[i].status && vagas[i].id)
-	        printf(" | %-3d | %-11.2f | %-13.2f | %-14.2f | %-18.2f | %-17lu |\n",
+	printf(" | ID | Peso Maximo | Altura Maxima | Largura Maxima | Comprimento Maximo | Carro Estacionado |\n");
+	for( i=0;i<MAX;i++){
+		if(vagas[i].id && vagas[i].status)
+			printf(" | %-3d | %-11.2f | %-13.2f | %-14.2f | %-18.2f | %-17u |\n",
 			vagas[i].id,
 			vagas[i].pesoMaximo,
 			vagas[i].alturaMaxima,
@@ -317,7 +326,7 @@ void ImprimirVagasOcupadas(void){
 void ImprimirVagasLivres(void){
 	int i;
 	
-printf(" | ID | PesoMax | AlturaMax | LarguraMax | ComprimentoMax |\n");
+	printf(" | ID | Peso Maximo | Altura Maxima | Largura Maxima | Comprimento Maximo |\n");
 	for( i=0;i<MAX;i++){
 		if(!vagas[i].status && vagas[i].id)
 			printf(" | %-3d | %-11.2f | %-13.2f | %-14.2f | %-18.2f |\n",
@@ -336,15 +345,15 @@ void SalvarVagas(char *NomeArquivoVagas){
 
 	
 	if((VagasAtuais=fopen(NomeArquivoVagas, "w"))==NULL){
-		printf("Não foi possivel criar o arquivo %s", NomeArquivoVagas);
+		printf("N䯠foi possivel criar o arquivo %s", NomeArquivoVagas);
 		return;
 	}
 	
 	
-	fprintf(VagasAtuais, " | ID  | Ocupada? | Peso Maximo | Altura Maxima | Largura Maxima | Comprimento Maximo | Carro Estacionado |\n");
+	fprintf(VagasAtuais, " | ID | Ocupada? | Peso Maximo | Altura Maxima | Largura Maxima | Comprimento Maximo | Carro Estacionado |\n");
 	for( i=0;i<MAX;i++){
 		if(vagas[i].id)
-			fprintf(VagasAtuais, " | %-3d | %-8d | %-11.2f | %-13.2f | %-14.2f | %-18.2f | %-17lu |\n",
+			fprintf(VagasAtuais, " | %-3d | %-8d | %-11.2f | %-13.2f | %-14.2f | %-18.2f | %-17u |\n",
 			vagas[i].id,
 			vagas[i].status,
 			vagas[i].pesoMaximo,
@@ -363,15 +372,15 @@ void SalvarCarros(char *NomeArquivoCarros){
 
 	
 	if((CarrosAtuais=fopen(NomeArquivoCarros, "w"))==NULL){
-		printf("Não foi possivel criar o arquivo %s", NomeArquivoCarros);
+		printf("N䯠foi possivel criar o arquivo %s", NomeArquivoCarros);
 		return;
 	}
 	
 	
-	fprintf(CarrosAtuais, " | chassi |       modelo do veículo        |    peso   |  altura  |  largura  |comprimento| Estacionado? |\n");
+	fprintf(CarrosAtuais, " | chassi |       modelo do velo        |    peso   |  altura  |  largura  |comprimento| Estacionado? |\n");
 	for( i=0; i<MAX; i++){
 		if (carros[i].chassi)
-		fprintf(CarrosAtuais, " | %-6lu | %-30s | %9.2f | %8.2f | %9.2f | %9.2f | %12d |\n", 
+		fprintf(CarrosAtuais, " | %-6u | %-30s | %9.2f | %8.2f | %9.2f | %9.2f | %12d |\n", 
 		carros[i].chassi, 
 		carros[i].modelo, 
 		carros[i].peso, 
@@ -389,15 +398,15 @@ void InserirVaga(char *NomeArquivoVagas){
 	int i=0;
 	FILE *ArquivoVagas;
 	/* Esta condicional verifica se o arquivo existe 
-	 * e se foi possível abrir, caso negativo encerra a função  */
+	 * e se foi possl abrir, caso negativo encerra a fun褯  */
 	if((ArquivoVagas = fopen(NomeArquivoVagas,"r"))==NULL){
-		printf("Não foi possível abrir o arquivo '%s'. \n", NomeArquivoVagas);
+		printf("N䯠foi possl abrir o arquivo '%s'. \n", NomeArquivoVagas);
 		return; //
 	}
 	
-	/*Laço de repetição para alimentar o vetor de veículos
-	 * enquanto o arquivo não termina
-	 * as interações são controladas pelo incremento da variavel i*/
+	/*La诠de repeti褯 para alimentar o vetor de velos
+	 * enquanto o arquivo n䯠termina
+	 * as intera趥s s䯠controladas pelo incremento da variavel i*/
 	while(!feof(ArquivoVagas)){
 			
 		fscanf(ArquivoVagas, " %u %f %f %f %f", 
@@ -414,10 +423,10 @@ void InserirVaga(char *NomeArquivoVagas){
 void ListarCarros(void){
 	int i;
 	
-	printf(" | chassi |       modelo do veículo        |    peso   |  altura  |  largura  |comprimento| Estacionado? |\n");
+	printf(" | chassi |       modelo do velo        |    peso   |  altura  |  largura  |comprimento| Estacionado? |\n");
 	for( i=0; i<MAX; i++){
 		if (carros[i].chassi)
-		printf(" | %-6lu | %-30s | %9.2f | %8.2f | %9.2f | %9.2f | %12d |\n", 
+		printf(" | %-6u | %-30s | %9.2f | %8.2f | %9.2f | %9.2f | %12d |\n", 
 		carros[i].chassi, 
 		carros[i].modelo, 
 		carros[i].peso, 
