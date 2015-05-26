@@ -16,7 +16,7 @@ float larguraMaxima;
 } vagas[MAX];
 
 struct frota {
-char *modelo;
+char modelo[MAX_String_Modelo];
 float peso;
 float altura;
 float comprimento;
@@ -25,20 +25,20 @@ int estacionado;
 unsigned int chassi;
 } carros[MAX];
 
-//declaraÃ§Ã£o de protÃ³tipos de funÃ§Ãµes
+//Prototipos de funcoes
 
-//funÃ§Ãµes de manipulaÃ§Ã£o dos vÃ©iculos
-int PosicaoCarroLivre(void);					//procura no vetor 'carros' pelo primeiro indice livre (carro.chassi=0), caso nÃ£o encontre retorna -1
+//funcoes de manipulacao dos veiculos
+int PosicaoCarroLivre(void);											//procura no vetor 'carros' pelo primeiro indice livre (carro.chassi=0), caso nÃ£o encontre retorna -1
 int BuscarCarroPorChassi (int chassi, int QuantidadeCarros);		    //Retorna o indice 'i' do chassi inserido como parametro, caso nÃ£o encontre retorna -1
-void EstacionarCarro(int QuantidadeCarros, int QuantidadeVagas);						//Procura no vetor 'vagas' a primeira vaga livre e disponivel para estacionar o carro
+void EstacionarCarro(int QuantidadeCarros, int QuantidadeVagas);		//Procura no vetor 'vagas' a primeira vaga livre e disponivel para estacionar o carro
 void InserirCarro(char *NomeArquivoCarros, int *QuantidadeCarros);		//Alimenta o  vetor 'carros' com dados de um arquivo externo passado como parametro
-void ListarCarroPorChassi(unsigned int chassi); //
+void ListarCarroPorChassi(unsigned int chassi); 						//
 void ApagarCarroPorChassi(int QuantidadeCarros);
 void ImprimirFilaDeCarros(int QuantidadeCarros); 
 void SalvarCarros(char *NomeArquivoCarros, int QuantidadeCarros);
 void ListarCarros(int QuantidadeCarros);
 
-//funÃ§Ãµes de manipulaÃ§Ã£o das vagas 
+//funcoes de manipulacao das vagas 
 int PosicaoVagaLivre(void);	
 int BuscarVagaPorId (int id, int QuantidadeVagas);
 int ListarVagaPorId(unsigned int id);
@@ -49,16 +49,13 @@ void InserirVaga(char *NomeArquivoVagas, int *QuantidadeVagas);
 void ApagarVagaPorId(int QuantidadeVagas);
 void ListarVagas(int QuantidadeVagas);
 
-//funÃ§Ãµes gerais do sistema
+//funcoes gerais do sistema
 int Menu(void);
 int Menu2(int QuantidadeCarros, int QuantidadeVagas);
 void Cria_lista(void);
 void CriarPainel(void);
-//void gotoxy( int column, int line );
-//int wherex();
-//int wherey();
 
-//funÃ§Ã£o principal
+//funcao principal
 int main(void) {
 	int escolha;
 	int QtdeCarros;
@@ -97,6 +94,8 @@ int main(void) {
 		}
 	}
 }
+
+//corpos das funcoes
 
 void Cria_lista(void) {
 /*cria a lista de carros e vagas, assumindo
@@ -146,16 +145,35 @@ int Menu(void) {
 int Menu2(int QuantidadeCarros, int QuantidadeVagas) {
 	int c=0;
 	do {
-		system("clear");
+		printf("\e[H\e[2J");
 		printf("\n %c[%d;%df",0x1B,1,1);
 		printf("-- MENU--\n");
-		printf(" | 1-Abrir|2-Entrar|3-Pesquisar|4-Sair|5-Salvar|6-Relatorios|0-Fim |\n");
+		printf("%c[%d;%dm | A%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmbrir%c[%dm",27,40,33,27,0);
+		
+		printf("%c[%d;%dm | E%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmntrar%c[%dm",27,40,33,27,0);
+		
+		printf("%c[%d;%dm | P%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmesquisar%c[%dm",27,40,33,27,0);
+
+		printf("%c[%d;%dm | S%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmair%c[%dm",27,40,33,27,0);
+
+		printf("%c[%d;%dm | S%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmalvar%c[%dm",27,40,33,27,0);
+		
+		printf("%c[%d;%dm | R%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmelatorios%c[%dm",27,40,33,27,0);
+
+		printf("%c[%d;%dm | F%c[%dm",27,40,32,27,0);
+		printf("%c[%d;%dmim |%c[%dm\n",27,40,33,27,0);
+
 		printf("-- Veiculos em Espera--\n");
 		ImprimirFilaDeCarros(QuantidadeCarros);
 		printf("\n");
 		printf("-- Vagas Livres--\n");
 		ImprimirVagasLivres(QuantidadeVagas);
-		//gotoxy(01, QuantidadeCarros+4);
 		printf("\n %c[%d;%df",0x1B,QuantidadeCarros+4,01);
 		scanf("%d", &c);
 		
@@ -301,7 +319,7 @@ void InserirCarro(char *NomeArquivoCarros, int *QuantidadeCarros){
 		printf("Não foi possível abrir o arquivo '%s'. \n", NomeArquivoCarros);
 		return; //
 	}
-	
+
 	/*Laço de repetição para alimentar o vetor de veículos
 	 * enquanto o arquivo não termina
 	 * as interações são controladas pelo incremento da variavel i*/
@@ -312,19 +330,21 @@ void InserirCarro(char *NomeArquivoCarros, int *QuantidadeCarros){
 		/*fgets(carros[i].modelo, 30, ArquivoCarros);
 		if(carros[i].modelo[strlen(carros[i].modelo)-1]=='\n')
 			carros[i].modelo[strlen(carros[i].modelo)-1]='\0';*/
-		fgets(linha, 255, ArquivoCarros);
-		carros[*QuantidadeCarros].modelo     =(char*)strtok(linha, ",\n");
-		carros[*QuantidadeCarros].chassi     =atoi(strtok(NULL, ",\n"));
-		carros[*QuantidadeCarros].peso       =atof(strtok(NULL, ",\n"));
-		carros[*QuantidadeCarros].altura     =atof(strtok(NULL, ",\n"));
-		carros[*QuantidadeCarros].comprimento=atof(strtok(NULL, ",\n"));
-		/*fscanf(ArquivoCarros, "%s %u %f %f %f %f", 
+		
+		/*fgets(linha, 255, ArquivoCarros);
+		carros[*QuantidadeCarros].modelo     =(char*)strtok(linha, ", \n");
+		carros[*QuantidadeCarros].chassi     =atoi(strtok(NULL, ", \n"));
+		carros[*QuantidadeCarros].peso       =atof(strtok(NULL, ", \n"));
+		carros[*QuantidadeCarros].altura     =atof(strtok(NULL, ", \n"));
+		carros[*QuantidadeCarros].comprimento=atof(strtok(NULL, ", \n"));*/
+		
+		fscanf(ArquivoCarros, "%s %u %f %f %f %f", 
 		&(carros[*QuantidadeCarros].modelo),
 		&(carros[*QuantidadeCarros].chassi),
 		&(carros[*QuantidadeCarros].peso), 
 		&(carros[*QuantidadeCarros].altura), 
 		&(carros[*QuantidadeCarros].comprimento), 
-		&(carros[*QuantidadeCarros].largura));*/
+		&(carros[*QuantidadeCarros].largura));
 		(*QuantidadeCarros)++;		
 	}
 	
@@ -334,7 +354,8 @@ void InserirCarro(char *NomeArquivoCarros, int *QuantidadeCarros){
 void ImprimirFilaDeCarros(int QuantidadeCarros){
 	int i;
 	
-	printf(" | chassi |       modelo do veî¤µlo          |    peso   |  altura  |  largura  | comprimento |\n");
+	printf("%c[%d;%dm | chassi |      modelo do veî¤µlo         |    peso   |  altura  |  largura  | comprimento |%c[%dm\n",27,4,33,27,0);
+	printf("%c[%d;%dm%c[%dm",27,40,31,27,5);
 	 for( i=0; i<QuantidadeCarros-1; i++){
 		if(!carros[i].estacionado){
 			printf(" | %-6u | %-30s | %9.2f | %8.2f | %9.2f | %11.2f |\n",
@@ -367,11 +388,11 @@ void ImprimirVagasOcupadas(int QuantidadeVagas){
 
 void ImprimirVagasLivres(int QuantidadeVagas){
 	int i;
-	
-	printf(" |  ID | Peso Maximo | Altura Maxima | Largura Maxima | Comprimento Maximo |\n");
+	printf("%c[%d;%dm | ID  | Peso Maximo | Altura Maxima | Largura Maxima | Comprimento Maximo |%c[%dm\n",27,4,33,27,0);
+	printf("%c[%d;%dm%c[%dm",27,40,31,27,5);
 	for(i=0; i<QuantidadeVagas;i++){
 		if(vagas[i].id && !vagas[i].status){
-			printf(" | %-3d | %-11.2f | %-13.2f | %-14.2f | %-18.2f |\n",
+			printf(" | %3d | %11.2f | %13.2f | %14.2f | %18.2f |\n",
 			vagas[i].id,
 			vagas[i].pesoMaximo,
 			vagas[i].alturaMaxima,
@@ -420,7 +441,7 @@ void SalvarCarros(char *NomeArquivoCarros, int QuantidadeCarros){
 	}
 	
 	
-	fprintf(CarrosAtuais, " | chassi |       modelo do veículo        |    peso   |  altura  |  largura  |comprimento| Estacionado? |\n");
+	fprintf(CarrosAtuais, " | chassi |       modelo do veículo       |    peso   |  altura  |  largura  |comprimento| Estacionado? |\n");
 	for( i=0; i<QuantidadeCarros; i++){
 		if (carros[i].chassi)
 		fprintf(CarrosAtuais, " | %-6u | %-30s | %9.2f | %8.2f | %9.2f | %9.2f | %12d |\n", 
@@ -494,37 +515,3 @@ void ListarVagas(int QuantidadeVagas){
 		vagas[i].carro);
 		}			
 }
-	
-/*void gotoxy( int column, int line ){
-  COORD coord;
-  coord.X = column;
-  coord.Y = line;
-  SetConsoleCursorPosition(
-    GetStdHandle( STD_OUTPUT_HANDLE ),
-    coord
-    );
-  }
-  * */
-
-/*int wherex(){
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  COORD                      result;
-  if (!GetConsoleScreenBufferInfo(
-         GetStdHandle( STD_OUTPUT_HANDLE ),
-         &csbi
-         ))
-    return -1;
-  return result.X;
-  }*/
-
-/*int wherey(){
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  COORD                      result;
-  if (!GetConsoleScreenBufferInfo(
-         GetStdHandle( STD_OUTPUT_HANDLE ),
-         &csbi
-         ))
-    return -1;
-  return result.Y;
-  }*/
-
