@@ -6,25 +6,34 @@
 #define MAX_String_Modelo 31
 
 struct estacionamento {
-unsigned int id;
-int status;
-unsigned int carro;
-float pesoMaximo;
-float alturaMaxima;
-float comprimentoMaximo;
-float larguraMaxima;
+        unsigned int id;
+        int status;
+        unsigned int carro;
+        float pesoMaximo;
+        float alturaMaxima;
+        float comprimentoMaximo;
+        float larguraMaxima;
 } vagas[MAX];
 
 struct frota {
-char modelo[MAX_String_Modelo];
-float peso;
-float altura;
-float comprimento;
-float largura;
-int estacionado;
-unsigned int chassi;
+        char modelo[MAX_String_Modelo];
+        float peso;
+        float altura;
+        float comprimento;
+        float largura;
+        int estacionado;
+        unsigned int chassi;
 } carros[MAX];
 
+struct estacionados {
+	unsigned int id;
+	unsigned int chassiCarro;
+	unsigned int idVaga;
+	time_t horaEntrada;
+	time_t horaSaida;
+	time_t tempoTotal;
+	float ValorTotal;
+} listaDeCarrosEstacionados[MAX];
 //Prototipos de funcoes
 
 //funcoes de manipulacao dos veiculos
@@ -125,9 +134,9 @@ int Menu(void) {
 		printf("\t 2. Inserir uma vaga\n");
 		printf("\t 3. Apagar um veî¤µlo\n");
 		printf("\t 4. Apagar uma vaga\n");
-        printf("\t 5. Listar vagas ocupadas\n");
+                printf("\t 5. Listar vagas ocupadas\n");
 		printf("\t 6. Listar vagas livres\n");
-        printf("\t 7. Listar carros estacionados\n");
+                printf("\t 7. Listar carros estacionados\n");
 		printf("\t 8. Salvar Vagas\n");
 		printf("\t 9. Salvar Carros\n");
 		printf("\t 10. Estacionar Carros\n");
@@ -309,12 +318,13 @@ void ApagarCarroPorChassi(int QuantidadeCarros){
 }
 
 void InserirCarro(char *NomeArquivoCarros, int *QuantidadeCarros){
-	char *linha;
+	char clearenvclinha[256];
 	
 	*QuantidadeCarros=0;
 	FILE *ArquivoCarros;
 	/* Esta condicional verifica se o arquivo existe 
-	 * e se foi possível abrir, caso negativo encerra a função  */
+	 * e se foi possível abrir, caso negativo encerra a função  
+         * */
 	if((ArquivoCarros = fopen(NomeArquivoCarros,"r"))==NULL){
 		printf("Não foi possível abrir o arquivo '%s'. \n", NomeArquivoCarros);
 		return; //
@@ -322,33 +332,20 @@ void InserirCarro(char *NomeArquivoCarros, int *QuantidadeCarros){
 
 	/*Laço de repetição para alimentar o vetor de veículos
 	 * enquanto o arquivo não termina
-	 * as interações são controladas pelo incremento da variavel i*/
-	while(!feof(ArquivoCarros)){
-		
-		/*Função que alimenta a string de modelo do carro
-		 * a condicional limpa os espaços em branco após a leitura*/
-		/*fgets(carros[i].modelo, 30, ArquivoCarros);
-		if(carros[i].modelo[strlen(carros[i].modelo)-1]=='\n')
-			carros[i].modelo[strlen(carros[i].modelo)-1]='\0';*/
-		
-		/*fgets(linha, 255, ArquivoCarros);
-		carros[*QuantidadeCarros].modelo     =(char*)strtok(linha, ", \n");
-		carros[*QuantidadeCarros].chassi     =atoi(strtok(NULL, ", \n"));
-		carros[*QuantidadeCarros].peso       =atof(strtok(NULL, ", \n"));
-		carros[*QuantidadeCarros].altura     =atof(strtok(NULL, ", \n"));
-		carros[*QuantidadeCarros].comprimento=atof(strtok(NULL, ", \n"));*/
-		
-		fscanf(ArquivoCarros, "%s %u %f %f %f %f", 
-		&(carros[*QuantidadeCarros].modelo),
-		&(carros[*QuantidadeCarros].chassi),
-		&(carros[*QuantidadeCarros].peso), 
-		&(carros[*QuantidadeCarros].altura), 
-		&(carros[*QuantidadeCarros].comprimento), 
-		&(carros[*QuantidadeCarros].largura));
-		(*QuantidadeCarros)++;		
-	}
-	
-	fclose(ArquivoCarros);
+	 * as interações são controladas pelo incremento do ponteiro *QuantidadeCarros 
+         * */
+	               
+                while(fgets(linha, 256, ArquivoCarros)!=NULL){
+                        
+                        strcpy(carros[*QuantidadeCarros].modelo,strtok(linha, ","));
+                        carros[*QuantidadeCarros].chassi     =atoi(strtok(NULL, ","));
+                        carros[*QuantidadeCarros].peso       =atof(strtok(NULL, ","));
+                        carros[*QuantidadeCarros].altura     =atof(strtok(NULL, ","));
+                        carros[*QuantidadeCarros].largura    =atof(strtok(NULL, ","));
+                        carros[*QuantidadeCarros].comprimento=atof(strtok(NULL, ","));
+                        (*QuantidadeCarros)++;
+                }
+       fclose(ArquivoCarros);
 }
 
 void ImprimirFilaDeCarros(int QuantidadeCarros){
@@ -458,6 +455,7 @@ void SalvarCarros(char *NomeArquivoCarros, int QuantidadeCarros){
 }
 
 void InserirVaga(char *NomeArquivoVagas, int *QuantidadeVagas){
+        char linha[256];
 
 	*QuantidadeVagas=0;
 	FILE *ArquivoVagas;
@@ -471,14 +469,13 @@ void InserirVaga(char *NomeArquivoVagas, int *QuantidadeVagas){
 	/*Laço de repetição para alimentar o vetor de veículos
 	 * enquanto o arquivo não termina
 	 * as interações são controladas pelo incremento da variavel i*/
-	while(!feof(ArquivoVagas)){
-			
-		fscanf(ArquivoVagas, "%u %f %f %f %f", 
-		&(vagas[*QuantidadeVagas].id),
-		&(vagas[*QuantidadeVagas].pesoMaximo), 
-		&(vagas[*QuantidadeVagas].alturaMaxima), 
-		&(vagas[*QuantidadeVagas].comprimentoMaximo), 
-		&(vagas[*QuantidadeVagas].larguraMaxima));
+	 while(fgets(linha, 256, ArquivoVagas)!=NULL){
+		
+		vagas[*QuantidadeVagas].id                =atoi(strtok(linha,","));
+		vagas[*QuantidadeVagas].pesoMaximo        =atof(strtok(NULL,",")); 
+		vagas[*QuantidadeVagas].alturaMaxima      =atof(strtok(NULL,",")); 
+		vagas[*QuantidadeVagas].comprimentoMaximo =atof(strtok(NULL,",")); 
+		vagas[*QuantidadeVagas].larguraMaxima     =atof(strtok(NULL,","));
 		(*QuantidadeVagas)++;		
 	}
 	fclose(ArquivoVagas);
