@@ -73,6 +73,7 @@ int main(void) {
 	Cria_lista();
 	InserirVaga("vagas.txt", &QtdeVagas);
 	InserirCarro("veiculos.txt", &QtdeCarros);
+	//alocarMemoria(ponteiro, posioes, estrutura);
 	for( ; ; ) {
 		escolha = Menu2(QtdeCarros, QtdeVagas);
 		switch(escolha) {
